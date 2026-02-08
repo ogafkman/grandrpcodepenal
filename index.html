@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrandRP - LSPD/FIB Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        gaming: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            accent: '#6366f1',
+                            secondary: '#ec4899'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card {
+            background: rgba(51, 65, 85, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(51, 65, 85, 0.6);
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card.selected {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        /* Utilities */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col md:flex-row overflow-hidden text-sm md:text-base">
+
+    <!-- SIDEBAR (HUD) -->
+    <aside class="w-full md:w-80 glass-panel flex flex-col z-20 md:h-full relative shrink-0">
+        <!-- Header Sidebar -->
+        <div class="p-6 border-b border-white/10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fas fa-gavel text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide">GrandRP</h1>
+                    <p class="text-xs text-slate-400">Assistant Pénal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Content Sidebar -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Recherche -->
+            <div class="relative group">
+                <i class="fas fa-search absolute left-3 top-3.5 text-slate-400 group-focus-within:text-indigo-400 transition-colors"></i>
+                <input type="text" id="searchInput" onkeyup="filterArticles()" placeholder="Rechercher infraction..." 
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500">
+            </div>
+
+            <!-- Niveau de recherche -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Statut Recherché</label>
+                <select id="wantedStatus" onchange="calculateTotal()" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all cursor-pointer">
+                    <option value="0">⚪ Non recherché (0)</option>
+                    <option value="1">⭐ 1 Étoile (15 mois)</option>
+                    <option value="2">⭐⭐ 2 Étoiles (30 mois)</option>
+                    <option value="3">⭐⭐⭐ 3 Étoiles (45 mois)</option>
+                    <option value="4">⭐⭐⭐⭐ 4 Étoiles (60 mois)</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 Étoiles (75 mois)</option>
+                </select>
+            </div>
+
+            <!-- Calculateur Live -->
+            <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50 space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Articles sélectionnés</span>
+                    <span id="countDisplay" class="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded text-xs font-bold">0</span>
+                </div>
+                <div class="h-px bg-slate-700/50"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Prison Fédérale</span>
+                    <span id="prisonDisplay" class="font-bold text-red-400">0 mois</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Amende Totale</span>
+                    <span id="fineDisplay" class="font-bold text-emerald-400">$0</span>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="resetAll()" class="col-span-1 py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2 font-medium">
+                    <i class="fas fa-trash-alt"></i> Reset
+                </button>
+                <button onclick="copyDiscordReport()" class="col-span-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
+                    <i class="fab fa-discord"></i> Rapport
+                </button>
+                <button onclick="openMirandaModal()" class="col-span-2 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-microphone-alt"></i> GÉNÉRER MIRANDA
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto relative scroll-smooth p-4 md:p-8" id="mainContainer">
+        
+        <!-- Header Mobile Only -->
+        <div class="md:hidden mb-6 flex items-center justify-between">
+            <h2 class="text-xl font-bold">Code Pénal</h2>
+        </div>
+
+        <!-- Container des articles (Généré par JS) -->
+        <div id="articlesContainer" class="space-y-8 pb-20">
+            <!-- Les sections seront injectées ici -->
+        </div>
+
+    </main>
+
+    <!-- MODAL MIRANDA -->
+    <div id="mirandaModal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeMirandaModal()"></div>
+        
+        <!-- Content -->
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl transform transition-all scale-100 flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50 rounded-t-2xl">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-file-contract text-yellow-500"></i> Droit Miranda & Arrestation
+                    </h3>
+                    <button onclick="closeMirandaModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto space-y-6">
+                    <!-- Config -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Votre Organisation</label>
+                            <select id="orgSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm" onchange="generateMirandaText()">
+                                <option value="LSPD">LSPD</option>
+                                <option value="FIB">FIB</option>
+                                <option value="SAHP">SAHP</option>
+                                <option value="SHERIFF">BCSO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Nom de l'agent (Optionnel)</label>
+                            <input type="text" id="agentName" placeholder="Ex: Agent Smith" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm" onkeyup="generateMirandaText()">
+                        </div>
+                    </div>
+
+                    <!-- Preview Text -->
+                    <div class="bg-black/50 rounded-xl p-4 border border-slate-700 relative group">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Lecture à voix haute</h4>
+                        <p id="mirandaText" class="font-mono text-sm leading-relaxed text-indigo-200 whitespace-pre-wrap"></p>
+                        <button onclick="copyToClipboard('mirandaText')" class="absolute top-2 right-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100">
+                            Copier
+                        </button>
+                    </div>
+
+                    <!-- Liste des charges -->
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Charges retenues</h4>
+                        <ul id="chargesList" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t border-slate-700 bg-slate-800/30 rounded-b-2xl flex justify-end gap-3">
+                    <button onclick="closeMirandaModal()" class="px-4 py-2 text-slate-400 hover:text-white transition-colors">Fermer</button>
+                    <button onclick="copyToClipboard('mirandaText')" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-lg text-white font-medium shadow-lg shadow-indigo-500/20">
+                        Copier le texte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-white text-slate-900 px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 font-semibold">
+        <i class="fas fa-check-circle text-green-500"></i>
+        <span id="toastMsg">Action effectuée</span>
+    </div>
+
+    <!-- DATA & LOGIC -->
+    <script>
+        // --- DONNÉES DU CODE PÉNAL (Tel que fourni) ---
+        const codePenal = {
+            "1.1": {
+                title: "Délit routier",
+                icon: "fa-car",
+                color: "text-emerald-400",
+                bg: "bg-emerald-500/10",
+                border: "border-emerald-500/30",
+                articles: {
+                "1.1.0": { name: "Klaxonnement abusif", fine: 10000, prison: 0, extra: "Mise en fourrière", detail: "Usage abusif du klaxon perturbant autrui.", code: "klaxon abusif" },
+                "1.1.1.a": { name: "Abandon de Véhicule", fine: 7500, prison: 0, extra: "Mise en fourrière", detail: "Abandon sur bord de route ou lieu privé.", code: "abandon vehicule" },
+                "1.1.1.b": { name: "Stationnement inapproprié", fine: 7500, prison: 0, extra: "Mise en fourrière", detail: "Gêne la circulation.", code: "stationnement" },
+                "1.1.2": { name: "Abandon Zone Spéciale", fine: 20000, prison: 0, extra: "Mise en fourrière", detail: "Lieu réservé fonctionnaires État.", code: "abandon zone speciale" },
+                "1.1.3": { name: "Excès Vitesse (1-30 km/h)", fine: 5000, prison: 0, extra: "", detail: "Dépassement de 1 à 30 km/h.", code: "vitesse 1-30 kmh" },
+                "1.1.4": { name: "Excès Vitesse (30-60 km/h)", fine: 10000, prison: 0, extra: "Fourrière", detail: "Dépassement de 30 à 60 km/h.", code: "vitesse 30-60 kmh" },
+                "1.1.5": { name: "Excès Vitesse (60-90 km/h)", fine: 15000, prison: 0, extra: "Fourrière + Retrait Permis", detail: "Dépassement de 60 à 90 km/h.", code: "vitesse 60-90 kmh" },
+                "1.1.6": { name: "Non Port Plaque", fine: 10000, prison: 0, extra: "Fourrière", detail: "Pas de plaque conforme.", code: "sans plaque" },
+                "1.1.7": { name: "Conduite dangereuse", fine: 20000, prison: 15, extra: "", detail: "Met en danger autrui.", code: "conduite dangereuse" },
+                "1.1.8": { name: "Vol de Véhicule", fine: 45000, prison: 45, extra: "", detail: "Vole ou tente de voler.", code: "vol vehicule" },
+                "1.1.9": { name: "Conduite sous influence", fine: 20000, prison: 15, extra: "", detail: "Substances altérant les capacités.", code: "conduite sous influence" },
+                "1.1.10": { name: "Course illégale", fine: 20000, prison: 30, extra: "Retrait permis", detail: "Course non autorisée.", code: "course illegale" },
+                }
+            },
+            "2.0": {
+                title: "Législation des Armes",
+                icon: "fa-gun",
+                color: "text-red-400",
+                bg: "bg-red-500/10",
+                border: "border-red-500/30",
+                articles: {
+                "2.0.1": { name: "Arme Légale sans PPA", fine: 20000, prison: 15, extra: "Confiscation", detail: "Arme avec série mais sans permis.", code: "arme sans ppa" },
+                "2.0.2": { name: "Arme Illégale (XXX)", fine: 20000, prison: 30, extra: "Confiscation + Retrait PPA", detail: "Pas de numéro de série.", code: "arme illegale xxx" },
+                "2.0.21": { name: "Arme tranchante", fine: 10000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Couteau, dague, etc.", code: "arme tranchante" },
+                "2.0.3": { name: "Matériel d'État", fine: 20000, prison: 45, extra: "Confiscation + Retrait PPA", detail: "Gilet, taser, arme police.", code: "materiel etat" },
+                "2.0.4": { name: "Gilet Pare-Balles Teinté", fine: 10000, prison: 15, extra: "Confiscation + Retrait PPA", detail: "Tout sauf noir ammu.", code: "gilet colore" },
+                "2.0.5": { name: "Vente/Achat Armes Illégal", fine: 30000, prison: 45, extra: "Confiscation + Retrait PPA", detail: "Lieu public ou privé.", code: "vente armes illegales" },
+                "2.0.6": { name: "Brandissement Public", fine: 20000, prison: 15, extra: "Confiscation + Retrait PPA", detail: "Sans raison valable.", code: "brandissement public" },
+                "2.0.7": { name: "Décharge Sans Raison", fine: 30000, prison: 30, extra: "Confiscation + Retrait PPA", detail: "Tirer sans raison légale.", code: "decharge arme" },
+                "2.0.8": { name: "Arme par destination", fine: 20000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Batte, club de golf utilisé de manière menaçante.", code: "arme par destination" },
+                }
+            },
+            "3.0": {
+                title: "Stupéfiants & Contrebande",
+                icon: "fa-cannabis",
+                color: "text-amber-400",
+                bg: "bg-amber-500/10",
+                border: "border-amber-500/30",
+                articles: {
+                "3.0.0.a": { name: "Plantation cannabis (2-3 plantes)", fine: 10000, prison: 0, extra: "Destruction des plantes", detail: "Petite échelle.", code: "plantation cannabis 2-3" },
+                "3.0.0.b": { name: "Plantation cannabis (4+ plantes)", fine: 20000, prison: 30, extra: "Destruction des plantes", detail: "Grande échelle.", code: "plantation cannabis 4+" },
+                "3.0.1": { name: "Possession Substances (1-10)", fine: 8000, prison: 0, extra: "Confiscation", detail: "Petite quantité.", code: "substances 1-10" },
+                "3.0.2": { name: "Possession Substances (11-20)", fine: 12000, prison: 0, extra: "Confiscation", detail: "Quantité modérée.", code: "substances 11-20" },
+                "3.0.3": { name: "Possession Substances (21+)", fine: 25000, prison: 30, extra: "Confiscation", detail: "Grande quantité.", code: "substances 21+" },
+                "3.0.4": { name: "Trafic de Substances", fine: 35000, prison: 45, extra: "Confiscation", detail: "Intention de distribuer.", code: "traffic substances" },
+                "3.0.5": { name: "Usage Substances", fine: 5000, prison: 0, extra: "Confiscation", detail: "Sauf cannabis.", code: "usage substances" },
+                "3.0.6": { name: "Intoxication Publique", fine: 5000, prison: 0, extra: "Cellule dégrisement", detail: "Risque pour soi ou autrui.", code: "intoxication publique" },
+                "3.0.7": { name: "Possession Articles Interdits", fine: 15000, prison: 0, extra: "Confiscation", detail: "Objets interdits à la vente.", code: "articles interdits" },
+                "3.0.8": { name: "Trafic Objets Interdits", fine: 30000, prison: 30, extra: "Confiscation", detail: "Intention de distribuer.", code: "traffic objets interdits" },
+                }
+            },
+            "4.0": {
+                title: "Crimes contre les Personnes",
+                icon: "fa-user-shield",
+                color: "text-indigo-400",
+                bg: "bg-indigo-500/10",
+                border: "border-indigo-500/30",
+                articles: {
+                "4.0.0": { name: "Outrage a agent", fine: 10000, prison: 15, extra: "Mise en garde à vue", detail: "Insultes ou propos dégradants envers un représentant des FDO.", code: "outrage agent" },
+                "4.0.1.a": { name: "Se faire Passer pour un Fonctionnaire", fine: 40000, prison: 75, extra: "Confiscation Armes + Retrait PPA", detail: "S'habiller, badge, ou prétendre être agent.", code: "faux fonctionnaire" },
+                "4.0.1.b": { name: "Utilisation illégale de signaux d'urgence", fine: 20000, prison: 15, extra: "", detail: "Usage de gyrophares/sirènes réservés FDO.", code: "signaux urgence" },
+                "4.0.2": { name: "Entrave à la Justice", fine: 20000, prison: 45, extra: "", detail: "Obstruer le travail des policiers ou magistrats.", code: "entrave justice" },
+                "4.0.2.1": { name: "Intimidation témoin", fine: 30000, prison: 60, extra: "Retrait PPA", detail: "Pressions ou menaces sur un témoin.", code: "intimidation temoin" },
+                "4.0.3": { name: "Agression par la Menace", fine: 15000, prison: 30, extra: "Confiscation Armes + Retrait PPA", detail: "Menaces d'agression physique ou morale.", code: "menaces agression" },
+                "4.0.3.b": { name: "Incitation à la haine ou violence", fine: 25000, prison: 45, extra: "Retrait PPA", detail: "Propos appelant à la haine ou discrimination.", code: "incitation haine" },
+                "4.0.4": { name: "Émeute", fine: 10000, prison: 45, extra: "", detail: "Soulèvement populaire non autorisé.", code: "emeute" },
+                "4.0.4.bis": { name: "Manifestation illégale", fine: 20000, prison: 30, extra: "", detail: "Rassemblement sur voie publique sans autorisation.", code: "manifestation illegale" },
+                "4.0.5": { name: "Tentative d'Evasion / Evasion", fine: 30000, prison: 75, extra: "Sans Possibilité de Caution", detail: "S'échapper d'un lieu d'enfermement.", code: "evasion" },
+                "4.0.6": { name: "Trouble à l'Ordre Public", fine: 20000, prison: 15, extra: "", detail: "Atteinte significative à la paix publique.", code: "trouble ordre public" },
+                "4.0.7": { name: "Coups et Blessures sur Citoyen", fine: 15000, prison: 30, extra: "", detail: "Violences intentionnelles sur civil.", code: "violence citoyen" },
+                "4.0.8": { name: "Coups et Blessures sur Agent FDO", fine: 20000, prison: 45, extra: "", detail: "Violences intentionnelles sur agent.", code: "violence agent fdo" },
+                "4.0.9": { name: "Insubordination (Agent Etat)", fine: 15000, prison: 45, extra: "Licenciement + Blacklist min. 3J", detail: "Remise en cause d'un ordre supérieur.", code: "insubordination agent" },
+                "4.0.10": { name: "Diffamation publique", fine: 10000, prison: 15, extra: "", detail: "Propos mensongers portant atteinte à l'honneur.", code: "diffamation" },
+                "4.1.0.a": { name: "Violation de la Vie Privée", fine: 10000, prison: 30, extra: "", detail: "Partage de parties intimes sans consentement.", code: "violation vie privee" },
+                "4.1.0.b": { name: "Atteinte à la dignité", fine: 10000, prison: 15, extra: "", detail: "Acte portant atteinte à l'intégrité ou dignité.", code: "atteinte dignite" },
+                "4.1.1": { name: "Propagation de Maladie", fine: 6000, prison: 0, extra: "", detail: "Propager intentionnellement une maladie.", code: "propagation maladie" },
+                "4.1.2.a": { name: "Refus d'Identification", fine: 10000, prison: 15, extra: "", detail: "Refus de donner ses papiers lors d'un contrôle.", code: "refus identification" },
+                "4.1.2.b": { name: "Délit de faciès (Agent Etat)", fine: 10000, prison: 0, extra: "Licenciement + Blacklist min. 7J", detail: "Contrôle discriminatoire.", code: "delit facies" },
+                "4.1.2.1.a": { name: "Chantage", fine: 20000, prison: 45, extra: "", detail: "Menacer de révéler des faits pour obtenir un bien.", code: "chantage" },
+                "4.1.2.1.b": { name: "Exécution du Chantage", fine: 35000, prison: 45, extra: "", detail: "Divulgation des infos suite au chantage.", code: "execution chantage" },
+                "4.1.3": { name: "Refus d'obtempérer", fine: 20000, prison: 45, extra: "Sans Possibilité de Caution", detail: "Refuser d'obéir à un ordre fonctionnaire.", code: "refus obtemperer" },
+                "4.1.3.1": { name: "Non-respect décision judiciaire", fine: 30000, prison: 60, extra: "", detail: "Interdiction contact, pointage, etc.", code: "non respect judiciaire" },
+                "4.1.4": { name: "Fausses Déclarations", fine: 15000, prison: 15, extra: "", detail: "Mentir lors d'un interrogatoire.", code: "fausses declarations" },
+                "4.1.5": { name: "Intrusion", fine: 10000, prison: 30, extra: "45 mois si bâtiment État", detail: "S'introduire sans droit en propriété privée.", code: "intrusion" },
+                "4.1.6": { name: "Agent d'Etat Corrompu", fine: 45000, prison: 60, extra: "Licenciement + Blacklist 30J", detail: "Se faire rémunérer pour un acte officiel.", code: "agent corrompu" },
+                "4.1.7": { name: "Non-Paiement Contraventions", fine: 0, prison: 45, extra: "Révocation licences + Sans Caution", detail: "Seuil de 500,000$ impayé atteint.", code: "contraventions impayees" },
+                "4.1.8": { name: "Port de masque", fine: 0, prison: 0, extra: "Motif de contrôle et fouille", detail: "Porter un masque en lieu public.", code: "port masque" },
+                "4.1.9": { name: "Evénement Dangereux non encadré", fine: 20000, prison: 0, extra: "", detail: "Sans 1 EMS et 1 Agent État.", code: "evenement dangereux" },
+                "4.2.0": { name: "Cambriolage", fine: 30000, prison: 45, extra: "Possibilité de Caution", detail: "Vol en habitation par effraction.", code: "cambriolage" },
+                "4.2.1": { name: "Extorsion", fine: 15000, prison: 45, extra: "Confiscation Armes + Retrait PPA", detail: "Obtenir signature/bien par violence/menace.", code: "extorsion" },
+                "4.2.2": { name: "Falsification Document", fine: 45000, prison: 60, extra: "", detail: "Modifier licences, contrats ou documents.", code: "falsification document" },
+                "4.2.2.b": { name: "Usurpation d'identité", fine: 15000, prison: 30, extra: "", detail: "Se faire passer pour une autre personne.", code: "usurpation identite" },
+                "4.2.3": { name: "Vol Qualifié", fine: 15000, prison: 45, extra: "Confiscation Armes + Retrait PPA", detail: "Vol avec violence ou arme.", code: "vol qualifie" },
+                "4.2.4": { name: "Chasse ou pêche illégale", fine: 20000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Braconnage sans relâchement.", code: "braconnage" },
+                "4.2.5": { name: "Corrompre un Fonctionnaire", fine: 45000, prison: 60, extra: "", detail: "Offre ou promesse à un agent.", code: "corruption fonctionnaire" },
+                "4.2.6.a": { name: "Mise en danger d'autrui", fine: 30000, prison: 45, extra: "", detail: "Exposition volontaire à un risque de mort.", code: "mise en danger" },
+                "4.2.6.b": { name: "Non-Assistance à Personne", fine: 10000, prison: 30, extra: "", detail: "Abandonner quelqu'un en danger de mort.", code: "non assistance" },
+                "4.2.7": { name: "Libération Caution Illégale", fine: 50000, prison: 60, extra: "Retrait Licences Avocat + PPA", detail: "Libérer sans approbation Gouvernement.", code: "liberation sans autorisation" },
+                "4.2.8": { name: "Refus du Devoir d'Agir", fine: 20000, prison: 45, extra: "Licenciement + Blacklist min. 7J", detail: "Agent ne respectant pas son devoir.", code: "refus devoir agent" },
+                "4.2.9": { name: "Création Communauté Illégale", fine: 30000, prison: 60, extra: "Confiscation Armes + Retrait PPA", detail: "Groupe pour actes répréhensibles.", code: "creation groupe illegal" },
+                "4.2.9.1": { name: "Recrutement Criminel", fine: 50000, prison: 75, extra: "Retrait PPA + Sans Caution", detail: "Recruter pour grand banditisme.", code: "recrutement criminel" },
+                "4.3.0": { name: "Grand Banditisme", fine: 20000, prison: 60, extra: "Confiscation Armes + Retrait PPA", detail: "Participation à un groupe criminel actif.", code: "grand banditisme" },
+                "4.3.1": { name: "Direction Groupe Illégal", fine: 30000, prison: 60, extra: "Confiscation Armes + Retrait PPA", detail: "Diriger un groupe criminel.", code: "direction groupe illegal" },
+                "4.3.2": { name: "Prise d'Otage Fonctionnaire", fine: 40000, prison: 75, extra: "Retrait PPA + Sans Caution", detail: "Détention illégale d'un agent État.", code: "otage fonctionnaire" },
+                "4.3.3": { name: "Prise d'Otage Civil", fine: 30000, prison: 60, extra: "Retrait PPA + Sans Caution", detail: "Détention illégale d'un civil.", code: "otage civil" },
+                "4.3.4": { name: "Homicide Involontaire", fine: 10000, prison: 30, extra: "Retrait PPA", detail: "Causer la mort sans intention spécifique.", code: "homicide involontaire" },
+                "4.3.5": { name: "Meurtre / Tentative", fine: 30000, prison: 60, extra: "Retrait PPA + Sans Caution", detail: "Attenter à la vie d'une personne.", code: "meurtre" },
+                "4.3.7": { name: "Meurtre avec Préméditation", fine: 40000, prison: 75, extra: "Retrait PPA + Sans Caution", detail: "Planifier l'acte d'attenter à la vie.", code: "meurtre premedite" },
+                }
+            },
+            "5.0": {
+                title : "Atteinte à la Nation",
+                color: "from-purple-600 to-violet-600",
+                icon: "fas fa-flag",
+                articles: {
+                "5.0.1": { name: "Tentative de Coup d'État", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Renversement illégal du pouvoir par la force.", code: "coup etat" },
+                "5.0.2": { name: "Divulgation de Secret d'État", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Divulgation d'informations confidentielles stratégiques.", code: "secret etat" },
+                "5.0.3": { name: "Terrorisme", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Emploi de la terreur à des fins idéologiques ou politiques.", code: "terrorisme" },
+                "5.0.4": { name: "Recrutement Terroriste", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Appel au recrutement pour actes terroristes.", code: "recrutement terrorisme" },
+                "5.0.6": { name: "Attaque Base Militaire", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Intrusion et attaque du personnel militaire pour vol.", code: "attaque base militaire" },
+                "5.0.7": { name: "Attentat contre Institutions", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Atteinte aux intérêts fondamentaux de la nation.", code: "attentat institutions" },
+                "5.0.8": { name: "Mouvement Insurrectionnel", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Action de rébellion visant à renverser le pouvoir.", code: "insurrection" }}
+            }
+        }
+
+        // --- STATE MANAGEMENT ---
+        let selectedArticles = new Set();
+        let currentSearch = "";
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderArticles();
+        });
+
+        // --- RENDER LOGIC ---
+        function renderArticles() {
+            const container = document.getElementById('articlesContainer');
+            container.innerHTML = '';
+
+            for (const [sectionKey, section] of Object.entries(codePenal)) {
+                // Filter logic
+                const sectionArticles = Object.entries(section.articles);
+                const filteredArticles = sectionArticles.filter(([key, art]) => {
+                    const search = currentSearch.toLowerCase();
+                    return art.name.toLowerCase().includes(search) || 
+                           art.code.toLowerCase().includes(search) || 
+                           key.includes(search);
+                });
+
+                if (filteredArticles.length === 0) continue;
+
+                // Create Section Header
+                const sectionHtml = document.createElement('div');
+                sectionHtml.className = 'animate-fade-in';
+                
+                let cardsHtml = '';
+                filteredArticles.forEach(([key, art]) => {
+                    const isSelected = selectedArticles.has(key);
+                    const selectedClass = isSelected ? 'selected ring-2 ring-indigo-500 bg-indigo-500/10' : '';
+                    const iconCheck = isSelected ? '<i class="fas fa-check-circle text-indigo-400 text-xl"></i>' : '<i class="far fa-circle text-slate-600 text-xl group-hover:text-indigo-400 transition-colors"></i>';
+                    
+                    cardsHtml += `
+                        <div onclick="toggleArticle('${key}')" 
+                             class="glass-card cursor-pointer rounded-2xl p-4 relative group select-none ${selectedClass}">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">${key}</span>
+                                ${iconCheck}
+                            </div>
+                            <h4 class="font-bold text-slate-200 mb-1 group-hover:text-white transition-colors">${art.name}</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2 mb-3 h-8">${art.detail || "Pas de description détaillée."}</p>
+                            
+                            <div class="flex gap-2 text-xs font-semibold">
+                                <div class="bg-slate-900/80 px-2 py-1 rounded text-emerald-400 border border-emerald-500/20">
+                                    $${art.fine.toLocaleString()}
+                                </div>
+                                <div class="bg-slate-900/80 px-2 py-1 rounded text-red-400 border border-red-500/20">
+                                    ${art.prison > 0 ? art.prison + ' mois' : 'Sans prison'}
+                                </div>
+                            </div>
+                            ${art.extra ? `<div class="mt-2 text-[10px] text-amber-300 font-mono"><i class="fas fa-exclamation-triangle mr-1"></i>${art.extra}</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                sectionHtml.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4 sticky top-0 z-10 py-2 backdrop-blur-sm bg-slate-900/80 md:bg-transparent md:backdrop-blur-none rounded-xl">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${section.bg} ${section.color}">
+                            <i class="fas ${section.icon}"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-200">${section.title}</h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        ${cardsHtml}
+                    </div>
+                `;
+                
+                container.appendChild(sectionHtml);
+            }
+        }
+
+        // --- INTERACTION LOGIC ---
+        function toggleArticle(key) {
+            if (selectedArticles.has(key)) {
+                selectedArticles.delete(key);
+            } else {
+                selectedArticles.add(key);
+            }
+            renderArticles(); // Re-render to show selection state
+            calculateTotal();
+        }
+
+        function filterArticles() {
+            currentSearch = document.getElementById('searchInput').value;
+            renderArticles();
+        }
+
+        function calculateTotal() {
+            let totalFine = 0;
+            let totalPrison = 0;
+            const wantedLevel = parseInt(document.getElementById('wantedStatus').value);
+            
+            // Add base wanted level
+            totalPrison += wantedLevel * 15;
+
+            selectedArticles.forEach(key => {
+                // Find article in data structure
+                for (const section of Object.values(codePenal)) {
+                    if (section.articles[key]) {
+                        totalFine += section.articles[key].fine;
+                        totalPrison += section.articles[key].prison;
+                        break;
+                    }
+                }
+            });
+
+            // Update HUD
+            animateValue("fineDisplay", totalFine, "$");
+            document.getElementById('prisonDisplay').textContent = totalPrison + " mois";
+            document.getElementById('countDisplay').textContent = selectedArticles.size;
+        }
+
+        function resetAll() {
+            selectedArticles.clear();
+            document.getElementById('wantedStatus').value = 0;
+            document.getElementById('searchInput').value = "";
+            currentSearch = "";
+            renderArticles();
+            calculateTotal();
+            showToast("Tout a été réinitialisé");
+        }
+
+        // --- MIRANDA & REPORT LOGIC ---
+        function openMirandaModal() {
+            document.getElementById('mirandaModal').classList.remove('hidden');
+            generateMirandaText();
+        }
+
+        function closeMirandaModal() {
+            document.getElementById('mirandaModal').classList.add('hidden');
+        }
+
+        function generateMirandaText() {
+            const org = document.getElementById('orgSelect').value;
+            const agent = document.getElementById('agentName').value || "[Nom Agent]";
+            let charges = [];
+            let totalFine = 0;
+            let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
+
+            selectedArticles.forEach(key => {
+                for (const section of Object.values(codePenal)) {
+                    if (section.articles[key]) {
+                        charges.push(section.articles[key].name);
+                        totalFine += section.articles[key].fine;
+                        totalPrison += section.articles[key].prison;
+                    }
+                }
+            });
+
+            // Update list in modal
+            const listEl = document.getElementById('chargesList');
+            listEl.innerHTML = charges.length ? charges.map(c => `<li>${c}</li>`).join('') : '<li class="text-slate-500 italic">Aucune charge sélectionnée</li>';
+
+            // Text Template
+            const text = `Monsieur/Madame, je suis l'agent ${agent} du ${org}.
+
+Je vous place en état d'arrestation pour les motifs suivants : 
+${charges.length > 0 ? charges.join(", ") : "Investigation en cours"}.
+
+Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice.
+Vous avez le droit à un avocat. Si vous n'en avez pas les moyens, un avocat vous sera commis d'office.
+Vous avez le droit à une assistance médicale si votre état de santé le nécessite.
+Avez-vous compris vos droits ?
+
+--- RÉSUMÉ SANCTIONS ---
+Amende : $${totalFine.toLocaleString()}
+Peine : ${totalPrison} mois de fédérale.`;
+
+            document.getElementById('mirandaText').textContent = text;
+        }
+
+        function copyDiscordReport() {
+            if (selectedArticles.size === 0) {
+                showToast("Sélectionnez d'abord des infractions", true);
+                return;
+            }
+
+            let report = "```md\n# RAPPORT D'ARRESTATION\n\n";
+            let totalFine = 0;
+            let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
+
+            report += `[INFRACTIONS RETENUES]\n`;
+            
+            selectedArticles.forEach(key => {
+                for (const section of Object.values(codePenal)) {
+                    if (section.articles[key]) {
+                        const art = section.articles[key];
+                        report += `- [${key}] ${art.name} ($${art.fine} | ${art.prison} mois)\n`;
+                        totalFine += art.fine;
+                        totalPrison += art.prison;
+                    }
+                }
+            });
+
+            report += `\n[TOTAL]\n`;
+            report += `> Amende: $${totalFine.toLocaleString()}\n`;
+            report += `> Prison: ${totalPrison} mois\n`;
+            report += "```";
+
+            copyToClipboardText(report);
+            showToast("Rapport copié pour Discord !");
+        }
+
+        // --- UTILS ---
+        function animateValue(id, end, prefix = "") {
+            const obj = document.getElementById(id);
+            const current = parseInt(obj.textContent.replace(/[^0-9]/g, '')) || 0;
+            if (current === end) return;
+            
+            obj.textContent = prefix + end.toLocaleString();
+            // Simple visual bump
+            obj.classList.remove('text-glow');
+            void obj.offsetWidth; // trigger reflow
+            obj.classList.add('text-glow');
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            copyToClipboardText(text);
+        }
+
+        function copyToClipboardText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copié dans le presse-papier");
+            });
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMsg');
+            msg.textContent = message;
+            
+            if(isError) {
+                toast.querySelector('i').className = "fas fa-exclamation-circle text-red-500";
+            } else {
+                toast.querySelector('i').className = "fas fa-check-circle text-green-500";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
