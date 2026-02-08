@@ -112,8 +112,8 @@
                     <i class="fas fa-gavel text-white text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg tracking-wide">GrandRP</h1>
-                    <p class="text-xs text-slate-400">Assistant Pénal</p>
+                    <h1 class="font-bold text-lg tracking-wide">Code Pénal</h1>
+                    <p class="text-xs text-slate-400">Outil développer par Jules Miton</p>
                 </div>
             </div>
         </div>
@@ -131,13 +131,13 @@
             <!-- Niveau de recherche -->
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Statut Recherché</label>
-                <select id="wantedStatus" onchange="calculateTotal()" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all cursor-pointer">
-                    <option value="0">⚪ Non recherché (0)</option>
-                    <option value="1">⭐ 1 Étoile (15 mois)</option>
-                    <option value="2">⭐⭐ 2 Étoiles (30 mois)</option>
-                    <option value="3">⭐⭐⭐ 3 Étoiles (45 mois)</option>
-                    <option value="4">⭐⭐⭐⭐ 4 Étoiles (60 mois)</option>
-                    <option value="5">⭐⭐⭐⭐⭐ 5 Étoiles (75 mois)</option>
+                <select id="wantedStatus" onchange="calculateTotal()" class="w-full bg-slate-700 border-0 rounded-lg px-4 py-3 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+                        <option value="0">🔍 Non recherché</option>
+                        <option value="1">⭐ 1 Étoile (15 mois)</option>
+                        <option value="2">⭐⭐ 2 Étoiles (30 mois)</option>
+                        <option value="3">⭐⭐⭐ 3 Étoiles (45 mois)</option>
+                        <option value="4">⭐⭐⭐⭐ 4 Étoiles (60 mois)</option>
+                        <option value="5">⭐⭐⭐⭐⭐ 5 Étoiles (75 mois)</option>
                 </select>
             </div>
 
@@ -155,15 +155,34 @@
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400">Amende Totale</span>
                     <span id="fineDisplay" class="font-bold text-emerald-400">$0</span>
-                </div>
+
+            </div>
+             <div class="flex justify-between items-center">
+                <span class="text-slate-400">Étoiles</span>
+                <span id="starsDisplay" class="font-bold text-yellow-400">0 ⭐</span>
+            </div>
+
+            <div>
+                <p class="text-slate-400 mb-1">Motif complet</p>
+                <p id="fullReasonDisplay" class="text-indigo-300 text-xs leading-relaxed">
+                    Aucun article sélectionné
+                </p>
+            </div>
+
+           
+            <div>
+                <p class="text-slate-400 mb-1">Motif (articles)</p>
+                <p id="articlesOnlyDisplay" class="text-indigo-300 text-xs leading-relaxed">
+                    Aucun article sélectionné
+                </p>
             </div>
 
             <!-- Boutons d'action -->
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="resetAll()" class="col-span-1 py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2 font-medium">
+                <button onclick="resetAll()" class="col-span- py-3 rounded-xl bg-red-500  hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
                     <i class="fas fa-trash-alt"></i> Reset
                 </button>
-                <button onclick="copyDiscordReport()" class="col-span-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
+                <button onclick="copyDiscordReport()" class="col-span-1 py-3 rounded-xl bg-indigo-600 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
                     <i class="fab fa-discord"></i> Rapport
                 </button>
                 <button onclick="openMirandaModal()" class="col-span-2 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
@@ -211,10 +230,11 @@
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Votre Organisation</label>
                             <select id="orgSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm" onchange="generateMirandaText()">
-                                <option value="LSPD">LSPD</option>
-                                <option value="FIB">FIB</option>
-                                <option value="SAHP">SAHP</option>
-                                <option value="SHERIFF">BCSO</option>
+                                <option value="LSPD">🚔 LSPD - Los Santos Police Department</option>
+                                <option value="FIB">🚨 FIB - Federal Investigation Bureau</option>
+                                <option value="GN">🪖 GN - National Guard</option>
+                                <option value="SAHP">🛣️ SAHP - San Andreas Highway Patrol </option>
+                                <option value="Gouvernement">🏛️ Government - Government of Los Santos </option>
                             </select>
                         </div>
                         <div>
@@ -257,6 +277,37 @@
 
     <!-- DATA & LOGIC -->
     <script>
+        function calculateStars(prisonMonths) {
+    // 1 étoile = 15 mois, max 5 étoiles
+    return Math.min(5, Math.floor(prisonMonths / 15));
+}
+
+function updateReasons() {
+    let fullReasons = [];
+    let articleCodes = [];
+
+    selectedArticles.forEach(articleKey => {
+        for (const section of Object.values(codePenal)) {
+            if (section.articles[articleKey]) {
+                const art = section.articles[articleKey];
+
+                // Motif COMPLET → uniquement le nom
+                fullReasons.push(art.name);
+
+                // Motif ARTICLES → uniquement les codes
+                articleCodes.push(articleKey);
+            }
+        }
+    });
+
+    document.getElementById('fullReasonDisplay').textContent =
+        fullReasons.length ? fullReasons.join(', ') : 'Aucun article sélectionné';
+
+    document.getElementById('articlesOnlyDisplay').textContent =
+        articleCodes.length ? articleCodes.join(', ') : 'Aucun article sélectionné';
+}
+
+
         // --- DONNÉES DU CODE PÉNAL (Tel que fourni) ---
         const codePenal = {
             "1.1": {
@@ -486,6 +537,11 @@
             let totalFine = 0;
             let totalPrison = 0;
             const wantedLevel = parseInt(document.getElementById('wantedStatus').value);
+            const stars = calculateStars(totalPrison);
+            document.getElementById('starsDisplay').textContent = `${stars} ⭐`;
+
+            updateReasons();
+
             
             // Add base wanted level
             totalPrison += wantedLevel * 15;
@@ -551,13 +607,19 @@
             // Text Template
             const text = `Monsieur/Madame, je suis l'agent ${agent} du ${org}.
 
-Je vous place en état d'arrestation pour les motifs suivants : 
+Vous êtes actuellement en état d'arrestation pour
 ${charges.length > 0 ? charges.join(", ") : "Investigation en cours"}.
 
-Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice.
-Vous avez le droit à un avocat. Si vous n'en avez pas les moyens, un avocat vous sera commis d'office.
-Vous avez le droit à une assistance médicale si votre état de santé le nécessite.
+Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice. Vous avez le droit à un avocat et à ce qu'un avocat soit présent lors de l'interrogatoire. Si vous n'en avez pas les moyens, un avocat vous sera fourni gratuitement.
+
+Durant chaque interrogatoire, vous pouvez décider à tout moment d'exercer ces droits, de ne répondre à aucune question ou de ne faire aucune déposition.
+
+Vous avez également le droit de recevoir des soins médicaux, de manger et de boire.
+
 Avez-vous compris vos droits ?
+
+( Si la personne ne répond pas, ou ne comprend pas, vous devez lui répéter 3 fois ces droits. VOUS devez avoir une bodycam allumée. )
+
 
 --- RÉSUMÉ SANCTIONS ---
 Amende : $${totalFine.toLocaleString()}
@@ -572,7 +634,7 @@ Peine : ${totalPrison} mois de fédérale.`;
                 return;
             }
 
-            let report = "```md\n# RAPPORT D'ARRESTATION\n\n";
+            let report = "```\n# RAPPORT D'ARRESTATION\n\n";
             let totalFine = 0;
             let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
 
