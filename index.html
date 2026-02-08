@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrandRP - LSPD/FIB Dashboard</title>
+    <title>GrandRP - Code Pénal</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -144,46 +144,48 @@
             <!-- Calculateur Live -->
             <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50 space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Articles sélectionnés</span>
+                    <span class="text-slate-400">Articles sélectionnés </span>
                     <span id="countDisplay" class="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded text-xs font-bold">0</span>
                 </div>
                 <div class="h-px bg-slate-700/50"></div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Prison Fédérale</span>
+                    <span class="text-slate-400">Prison Fédérale :</span>
                     <span id="prisonDisplay" class="font-bold text-red-400">0 mois</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Amende Totale</span>
+                    <span class="text-slate-400">Amende Totale :</span>
                     <span id="fineDisplay" class="font-bold text-emerald-400">$0</span>
 
             </div>
              <div class="flex justify-between items-center">
-                <span class="text-slate-400">Étoiles</span>
-                <span id="starsDisplay" class="font-bold text-yellow-400">0 ⭐</span>
+                <span class="text-slate-400">Étoiles :</span>
+                <span id="starsDisplay" class="text-yellow-400 text-lg tracking-wider"></span>
             </div>
 
             <div>
-                <p class="text-slate-400 mb-1">Motif complet</p>
+                <p class="text-slate-400 mb-1">Motif complet :</p>
                 <p id="fullReasonDisplay" class="text-indigo-300 text-xs leading-relaxed">
-                    Aucun article sélectionné
                 </p>
             </div>
-
-           
+        
             <div>
-                <p class="text-slate-400 mb-1">Motif (articles)</p>
+                <p class="text-slate-400 mb-1">Motif (articles) : </p>
                 <p id="articlesOnlyDisplay" class="text-indigo-300 text-xs leading-relaxed">
-                    Aucun article sélectionné
                 </p>
             </div>
-
+            <div>
+            <p class="text-slate-400 mb-1">Peine Suplementaire :</p>
+            <ul id="sanctionsDisplay" class="text-yellow-400 text-xs leading-relaxed list-disc list-inside">
+                </p>
+            </ul>
+            </div>
             <!-- Boutons d'action -->
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="resetAll()" class="col-span- py-3 rounded-xl bg-red-500  hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
                     <i class="fas fa-trash-alt"></i> Reset
                 </button>
                 <button onclick="copyDiscordReport()" class="col-span-1 py-3 rounded-xl bg-indigo-600 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
-                    <i class="fab fa-discord"></i> Rapport
+                    <i class="fas fa-file-alt"></i> Rapport
                 </button>
                 <button onclick="openMirandaModal()" class="col-span-2 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-microphone-alt"></i> GÉNÉRER MIRANDA
@@ -214,7 +216,8 @@
         
         <!-- Content -->
         <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl transform transition-all scale-100 flex flex-col max-h-[90vh]">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-5xl shadow-2xl transform transition-all scale-100 flex flex-col max-h-[90vh]">
+
                 <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50 rounded-t-2xl">
                     <h3 class="text-xl font-bold text-white flex items-center gap-2">
                         <i class="fas fa-file-contract text-yellow-500"></i> Droit Miranda & Arrestation
@@ -237,10 +240,6 @@
                                 <option value="Gouvernement">🏛️ Government - Government of Los Santos </option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Nom de l'agent (Optionnel)</label>
-                            <input type="text" id="agentName" placeholder="Ex: Agent Smith" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm" onkeyup="generateMirandaText()">
-                        </div>
                     </div>
 
                     <!-- Preview Text -->
@@ -250,13 +249,6 @@
                         <button onclick="copyToClipboard('mirandaText')" class="absolute top-2 right-2 bg-slate-700 hover:bg-indigo-600 text-white text-xs px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100">
                             Copier
                         </button>
-                    </div>
-
-                    <!-- Liste des charges -->
-                    <div class="bg-slate-800/50 rounded-xl p-4">
-                        <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Charges retenues</h4>
-                        <ul id="chargesList" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
-                    </div>
                 </div>
 
                 <div class="p-6 border-t border-slate-700 bg-slate-800/30 rounded-b-2xl flex justify-end gap-3">
@@ -277,35 +269,59 @@
 
     <!-- DATA & LOGIC -->
     <script>
-        function calculateStars(prisonMonths) {
-    // 1 étoile = 15 mois, max 5 étoiles
+function calculateStars(prisonMonths) {
     return Math.min(5, Math.floor(prisonMonths / 15));
+
+
 }
 
 function updateReasons() {
     let fullReasons = [];
     let articleCodes = [];
+    let sanctionsSet = new Set();
 
     selectedArticles.forEach(articleKey => {
         for (const section of Object.values(codePenal)) {
             if (section.articles[articleKey]) {
                 const art = section.articles[articleKey];
 
-                // Motif COMPLET → uniquement le nom
+                // Motifs
                 fullReasons.push(art.name);
-
-                // Motif ARTICLES → uniquement les codes
                 articleCodes.push(articleKey);
+
+                // Sanctions (extra)
+                if (art.extra && art.extra.trim() !== "") {
+                    // Séparer si plusieurs sanctions dans le texte
+                    art.extra.split("+").forEach(s => {
+                        sanctionsSet.add(s.trim());
+                    });
+                }
             }
         }
     });
 
+    // Motif complet
     document.getElementById('fullReasonDisplay').textContent =
-        fullReasons.length ? fullReasons.join(', ') : 'Aucun article sélectionné';
+        fullReasons.length ? fullReasons.join(', ') : '';
 
+    // Motif articles
     document.getElementById('articlesOnlyDisplay').textContent =
-        articleCodes.length ? articleCodes.join(', ') : 'Aucun article sélectionné';
+        articleCodes.length ? articleCodes.join(', ') : '';
+
+    // Sanctions
+    const sanctionsDisplay = document.getElementById('sanctionsDisplay');
+    sanctionsDisplay.innerHTML = '';
+
+    if (sanctionsSet.size === 0) {
+        sanctionsDisplay.innerHTML =
+            ``;
+    } else {
+        sanctionsSet.forEach(sanction => {
+            sanctionsDisplay.innerHTML += `<li>${sanction}</li>`;
+        });
+    }
 }
+
 
 
         // --- DONNÉES DU CODE PÉNAL (Tel que fourni) ---
@@ -323,7 +339,7 @@ function updateReasons() {
                 "1.1.2": { name: "Abandon Zone Spéciale", fine: 20000, prison: 0, extra: "Mise en fourrière", detail: "Lieu réservé fonctionnaires État.", code: "abandon zone speciale" },
                 "1.1.3": { name: "Excès Vitesse (1-30 km/h)", fine: 5000, prison: 0, extra: "", detail: "Dépassement de 1 à 30 km/h.", code: "vitesse 1-30 kmh" },
                 "1.1.4": { name: "Excès Vitesse (30-60 km/h)", fine: 10000, prison: 0, extra: "Fourrière", detail: "Dépassement de 30 à 60 km/h.", code: "vitesse 30-60 kmh" },
-                "1.1.5": { name: "Excès Vitesse (60-90 km/h)", fine: 15000, prison: 0, extra: "Fourrière + Retrait Permis", detail: "Dépassement de 60 à 90 km/h.", code: "vitesse 60-90 kmh" },
+                "1.1.5": { name: "Excès Vitesse (60-90 km/h)", fine: 15000, prison: 0, extra: "Fourrière + Retrait permis", detail: "Dépassement de 60 à 90 km/h.", code: "vitesse 60-90 kmh" },
                 "1.1.6": { name: "Non Port Plaque", fine: 10000, prison: 0, extra: "Fourrière", detail: "Pas de plaque conforme.", code: "sans plaque" },
                 "1.1.7": { name: "Conduite dangereuse", fine: 20000, prison: 15, extra: "", detail: "Met en danger autrui.", code: "conduite dangereuse" },
                 "1.1.8": { name: "Vol de Véhicule", fine: 45000, prison: 45, extra: "", detail: "Vole ou tente de voler.", code: "vol vehicule" },
@@ -533,35 +549,56 @@ function updateReasons() {
             renderArticles();
         }
 
-        function calculateTotal() {
-            let totalFine = 0;
-            let totalPrison = 0;
-            const wantedLevel = parseInt(document.getElementById('wantedStatus').value);
-            const stars = calculateStars(totalPrison);
-            document.getElementById('starsDisplay').textContent = `${stars} ⭐`;
+function calculateTotal() {
+    let totalFine = 0;
+    let totalPrison = 0;
 
-            updateReasons();
+    const wantedLevel = parseInt(document.getElementById('wantedStatus').value);
 
-            
-            // Add base wanted level
-            totalPrison += wantedLevel * 15;
+    // Prison liée aux étoiles de recherche
+    totalPrison += wantedLevel * 15;
 
-            selectedArticles.forEach(key => {
-                // Find article in data structure
-                for (const section of Object.values(codePenal)) {
-                    if (section.articles[key]) {
-                        totalFine += section.articles[key].fine;
-                        totalPrison += section.articles[key].prison;
-                        break;
-                    }
-                }
-            });
-
-            // Update HUD
-            animateValue("fineDisplay", totalFine, "$");
-            document.getElementById('prisonDisplay').textContent = totalPrison + " mois";
-            document.getElementById('countDisplay').textContent = selectedArticles.size;
+    // Articles sélectionnés
+    selectedArticles.forEach(key => {
+        for (const section of Object.values(codePenal)) {
+            if (section.articles[key]) {
+                totalFine += section.articles[key].fine;
+                totalPrison += section.articles[key].prison;
+                break;
+            }
         }
+    });
+
+    // PLAFONDS
+    const MAX_FINE = 50000;
+    const MAX_PRISON = 75;
+
+    totalFine = Math.min(totalFine, MAX_FINE);
+    totalPrison = Math.min(totalPrison, MAX_PRISON);
+
+    // ⭐ CALCUL DES ÉTOILES (APRÈS le calcul prison)
+    const stars = calculateStars(totalPrison);
+    document.getElementById('starsDisplay').textContent = renderStars(stars);
+
+
+    // HUD
+    animateValue("fineDisplay", totalFine, "$");
+    document.getElementById('prisonDisplay').textContent = totalPrison + " mois";
+    document.getElementById('countDisplay').textContent = selectedArticles.size;
+
+    updateReasons();
+}
+function renderStars(stars) {
+    const maxStars = 5;
+    let output = "";
+
+    for (let i = 1; i <= maxStars; i++) {
+        output += i <= stars ? "⭐" : "";
+    }
+
+    return output;
+}
+
 
         function resetAll() {
             selectedArticles.clear();
@@ -574,18 +611,24 @@ function updateReasons() {
         }
 
         // --- MIRANDA & REPORT LOGIC ---
-        function openMirandaModal() {
-            document.getElementById('mirandaModal').classList.remove('hidden');
-            generateMirandaText();
-        }
+function openMirandaModal() {
+    if (selectedArticles.size === 0) {
+        showToast("Veuillez choisir au moins un motif");
+        return; // On sort de la fonction si aucun article n'est sélectionné
+    }
+
+    document.getElementById('mirandaModal').classList.remove('hidden');
+    generateMirandaText();
+}
+
 
         function closeMirandaModal() {
             document.getElementById('mirandaModal').classList.add('hidden');
         }
 
         function generateMirandaText() {
+
             const org = document.getElementById('orgSelect').value;
-            const agent = document.getElementById('agentName').value || "[Nom Agent]";
             let charges = [];
             let totalFine = 0;
             let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
@@ -600,15 +643,15 @@ function updateReasons() {
                 }
             });
 
-            // Update list in modal
-            const listEl = document.getElementById('chargesList');
-            listEl.innerHTML = charges.length ? charges.map(c => `<li>${c}</li>`).join('') : '<li class="text-slate-500 italic">Aucune charge sélectionnée</li>';
-
+            const now = new Date();
+            const date = now.toLocaleDateString('fr-FR');
+            const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
             // Text Template
-            const text = `Monsieur/Madame, je suis l'agent ${agent} du ${org}.
+            const text = `MADAME, MONSIEUR,
 
-Vous êtes actuellement en état d'arrestation pour
-${charges.length > 0 ? charges.join(", ") : "Investigation en cours"}.
+Vous êtes actuellement en état d'arrestation pour ${charges.length > 0 ? charges.join(", ") : ""}, par le ${org}.
+
+Nous sommes le : ${date} à ${heure}.
 
 Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice. Vous avez le droit à un avocat et à ce qu'un avocat soit présent lors de l'interrogatoire. Si vous n'en avez pas les moyens, un avocat vous sera fourni gratuitement.
 
@@ -618,47 +661,33 @@ Vous avez également le droit de recevoir des soins médicaux, de manger et de b
 
 Avez-vous compris vos droits ?
 
-( Si la personne ne répond pas, ou ne comprend pas, vous devez lui répéter 3 fois ces droits. VOUS devez avoir une bodycam allumée. )
-
-
---- RÉSUMÉ SANCTIONS ---
-Amende : $${totalFine.toLocaleString()}
-Peine : ${totalPrison} mois de fédérale.`;
+( Si la personne ne répond pas, ou ne comprend pas, vous devez lui répéter 3 fois ces droits. VOUS devez avoir une bodycam allumée. )`;
 
             document.getElementById('mirandaText').textContent = text;
         }
 
-        function copyDiscordReport() {
-            if (selectedArticles.size === 0) {
-                showToast("Sélectionnez d'abord des infractions", true);
-                return;
-            }
+function copyDiscordReport() {
+    const source = document.getElementById("fullReasonDisplay");
 
-            let report = "```\n# RAPPORT D'ARRESTATION\n\n";
-            let totalFine = 0;
-            let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
+    if (!source || source.textContent.trim() === "") {
+        showToast("Aucun motif à copier", true);
+        return;
+    }
 
-            report += `[INFRACTIONS RETENUES]\n`;
-            
-            selectedArticles.forEach(key => {
-                for (const section of Object.values(codePenal)) {
-                    if (section.articles[key]) {
-                        const art = section.articles[key];
-                        report += `- [${key}] ${art.name} ($${art.fine} | ${art.prison} mois)\n`;
-                        totalFine += art.fine;
-                        totalPrison += art.prison;
-                    }
-                }
-            });
+    let text = source.textContent;
 
-            report += `\n[TOTAL]\n`;
-            report += `> Amende: $${totalFine.toLocaleString()}\n`;
-            report += `> Prison: ${totalPrison} mois\n`;
-            report += "```";
+    text = text
+        .replace(/,/g, " + ")
+        .replace(/'/g, "")
+        .replace(/ê/g, "e")
+        .replace(/\s*\+\s*/g, " + ")
+        .trim();
 
-            copyToClipboardText(report);
-            showToast("Rapport copié pour Discord !");
-        }
+    navigator.clipboard.writeText(text);
+    showToast("Rapport copié dans le presse-papier");
+}
+
+
 
         // --- UTILS ---
         function animateValue(id, end, prefix = "") {
@@ -684,22 +713,49 @@ Peine : ${totalPrison} mois de fédérale.`;
             });
         }
 
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toastMsg');
-            msg.textContent = message;
-            
-            if(isError) {
-                toast.querySelector('i').className = "fas fa-exclamation-circle text-red-500";
-            } else {
-                toast.querySelector('i').className = "fas fa-check-circle text-green-500";
-            }
+        function showToast(message, duration = 2500) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('hidden');      // Affiche le toast
+    toast.classList.add('opacity-100');    // Ajoute transition si besoin
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+    // Cache le toast après la durée
+    setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('opacity-100');
+    }, duration);
+}
+
+        let toastTimeout;
+
+function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    clearTimeout(toastTimeout);
+
+    toast.textContent = message;
+
+    toast.classList.remove("hidden");
+    toast.classList.remove("border-red-500", "text-red-400");
+    toast.classList.remove("border-green-500", "text-green-400");
+
+    if (isError) {
+        toast.classList.add("border-red-500", "text-red-400");
+    } else {
+        toast.classList.add("border-green-500", "text-green-400");
+    }
+
+    toastTimeout = setTimeout(() => {
+        toast.classList.add("hidden");
+    }, 2500);
+}
+
     </script>
+<div id="toast"
+     class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 border border-slate-700
+            text-white px-4 py-2 rounded-xl shadow-xl transition-all">
+</div>
+
 </body>
 </html>
