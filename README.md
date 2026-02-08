@@ -24,7 +24,7 @@ L’objectif est de rendre les procédures plus **simples**, **rapides** et **cl
 
 ## 🧑‍✈️ Pour qui ?
 
-* Forces de l’ordre RP (LSPD, LSSD, etc.)
+* Forces de l’ordre RP (LSPD, FIB, etc.)
 * Joueurs souhaitant mieux connaître le code pénal
 * Nouveaux joueurs sur **Grand RP**
 
