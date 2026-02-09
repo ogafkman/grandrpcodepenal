@@ -99,10 +99,36 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            color: #1e293b;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            transform: translateY(150%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #toast.show { transform: translateY(0); }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden text-sm md:text-base">
-
+        <div id="toast">
+        <i class="fas fa-check-circle text-green-500 text-xl"></i>
+        <span id="toastMsg">Action effectuée !</span>
+    </div>
     <!-- SIDEBAR (HUD) -->
     <aside class="w-full md:w-80 glass-panel flex flex-col z-20 md:h-full relative shrink-0">
         <!-- Header Sidebar -->
@@ -181,10 +207,10 @@
             </div>
             <!-- Boutons d'action -->
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="resetAll()" class="col-span- py-3 rounded-xl bg-red-500  hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
+                <button onclick="resetAll()" class="py-3 rounded-xl bg-red-500 hover:bg-red-600 transition-all text-white font-medium">
                     <i class="fas fa-trash-alt"></i> Reset
                 </button>
-                <button onclick="copyDiscordReport()" class="col-span-1 py-3 rounded-xl bg-indigo-600 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-white shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 font-medium">
+                <button onclick="copyDiscordReport()" class="py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition-all text-white font-medium">
                     <i class="fas fa-file-alt"></i> Rapport
                 </button>
                 <button onclick="openMirandaModal()" class="col-span-2 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
@@ -260,13 +286,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-white text-slate-900 px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 font-semibold">
-        <i class="fas fa-check-circle text-green-500"></i>
-        <span id="toastMsg">Action effectuée</span>
-    </div>
-
     <!-- DATA & LOGIC -->
     <script>
 function calculateStars(prisonMonths) {
@@ -540,7 +559,7 @@ function updateReasons() {
             } else {
                 selectedArticles.add(key);
             }
-            renderArticles(); // Re-render to show selection state
+            renderArticles(); 
             calculateTotal();
         }
 
@@ -600,20 +619,24 @@ function renderStars(stars) {
 }
 
 
+
+        // FONCTION RESET MODIFIÉE
         function resetAll() {
+            showToast("Réinitialisation effectuée");
             selectedArticles.clear();
             document.getElementById('wantedStatus').value = 0;
             document.getElementById('searchInput').value = "";
-            currentSearch = "";
-            renderArticles();
-            calculateTotal();
-            showToast("Tout a été réinitialisé");
-        }
+            
+            // On rafraîchit l'affichage (si tes fonctions existent)
+            if (window.renderArticles) renderArticles();
+            if (window.calculateTotal) calculateTotal();
+            
+            // ON AFFICHE LA NOTIF
 
+        }
         // --- MIRANDA & REPORT LOGIC ---
 function openMirandaModal() {
     if (selectedArticles.size === 0) {
-        showToast("Veuillez choisir au moins un motif");
         return; // On sort de la fonction si aucun article n'est sélectionné
     }
 
@@ -665,12 +688,12 @@ Avez-vous compris vos droits ?
 
             document.getElementById('mirandaText').textContent = text;
         }
-
 function copyDiscordReport() {
+    showToast("Rapport copié !");
     const source = document.getElementById("fullReasonDisplay");
 
+
     if (!source || source.textContent.trim() === "") {
-        showToast("Aucun motif à copier", true);
         return;
     }
 
@@ -682,10 +705,10 @@ function copyDiscordReport() {
         .replace(/ê/g, "e")
         .replace(/\s*\+\s*/g, " + ")
         .trim();
+    navigator.clipboard.writeText(report);
 
-    navigator.clipboard.writeText(text);
-    showToast("Rapport copié dans le presse-papier");
-}
+
+        }
 
 
 
@@ -708,54 +731,16 @@ function copyDiscordReport() {
         }
 
         function copyToClipboardText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Copié dans le presse-papier");
-            });
+            navigator.clipboard.writeText(text).then(() => { });
+            showToast("Texte copié !");
         }
-
-        function showToast(message, duration = 2500) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.remove('hidden');      // Affiche le toast
-    toast.classList.add('opacity-100');    // Ajoute transition si besoin
-
-    // Cache le toast après la durée
-    setTimeout(() => {
-        toast.classList.add('hidden');
-        toast.classList.remove('opacity-100');
-    }, duration);
-}
-
-        let toastTimeout;
-
-function showToast(message, isError = false) {
-    const toast = document.getElementById("toast");
-    if (!toast) return;
-
-    clearTimeout(toastTimeout);
-
-    toast.textContent = message;
-
-    toast.classList.remove("hidden");
-    toast.classList.remove("border-red-500", "text-red-400");
-    toast.classList.remove("border-green-500", "text-green-400");
-
-    if (isError) {
-        toast.classList.add("border-red-500", "text-red-400");
-    } else {
-        toast.classList.add("border-green-500", "text-green-400");
-    }
-
-    toastTimeout = setTimeout(() => {
-        toast.classList.add("hidden");
-    }, 2500);
-}
-
+                function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
     </script>
-<div id="toast"
-     class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 border border-slate-700
-            text-white px-4 py-2 rounded-xl shadow-xl transition-all">
 </div>
-
 </body>
 </html>
