@@ -635,45 +635,55 @@ function renderStars(stars) {
             // ON AFFICHE LA NOTIF
 
         }
-        // --- MIRANDA & REPORT LOGIC ---
+// --- MIRANDA & REPORT LOGIC ---
+
+/**
+ * Ouvre la modale Miranda
+ * Ajout d'un toast si aucun article n'est sélectionné
+ */
 function openMirandaModal() {
     if (selectedArticles.size === 0) {
-        return; // On sort de la fonction si aucun article n'est sélectionné
+        showToast("Sélectionnez des articles d'abord !");
+        return; 
     }
 
     document.getElementById('mirandaModal').classList.remove('hidden');
     generateMirandaText();
+    showToast("Droits Miranda générés !");
 }
 
+function closeMirandaModal() {
+    document.getElementById('mirandaModal').classList.add('hidden');
+}
 
-        function closeMirandaModal() {
-            document.getElementById('mirandaModal').classList.add('hidden');
+/**
+ * Génère le texte complet des droits Miranda
+ */
+function generateMirandaText() {
+    const org = document.getElementById('orgSelect').value;
+    let charges = [];
+    let totalFine = 0;
+    let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
+
+    // On parcourt les articles sélectionnés pour calculer les peines
+    selectedArticles.forEach(key => {
+        for (const section of Object.values(codePenal)) {
+            if (section.articles[key]) {
+                charges.push(section.articles[key].name);
+                totalFine += section.articles[key].fine;
+                totalPrison += section.articles[key].prison;
+            }
         }
+    });
 
-        function generateMirandaText() {
+    const now = new Date();
+    const date = now.toLocaleDateString('fr-FR');
+    const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-            const org = document.getElementById('orgSelect').value;
-            let charges = [];
-            let totalFine = 0;
-            let totalPrison = parseInt(document.getElementById('wantedStatus').value) * 15;
+    // Modèle de texte
+    const text = `MADAME, MONSIEUR,
 
-            selectedArticles.forEach(key => {
-                for (const section of Object.values(codePenal)) {
-                    if (section.articles[key]) {
-                        charges.push(section.articles[key].name);
-                        totalFine += section.articles[key].fine;
-                        totalPrison += section.articles[key].prison;
-                    }
-                }
-            });
-
-            const now = new Date();
-            const date = now.toLocaleDateString('fr-FR');
-            const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            // Text Template
-            const text = `MADAME, MONSIEUR,
-
-Vous êtes actuellement en état d'arrestation pour ${charges.length > 0 ? charges.join(", ") : ""}, par le ${org}.
+Vous êtes actuellement en état d'arrestation pour ${charges.length > 0 ? charges.join(", ") : "infractions diverses"}, par le ${org}.
 
 Nous sommes le : ${date} à ${heure}.
 
@@ -687,14 +697,16 @@ Avez-vous compris vos droits ?
 
 ( Si la personne ne répond pas, ou ne comprend pas, vous devez lui répéter 3 fois ces droits. VOUS devez avoir une bodycam allumée. )`;
 
-            document.getElementById('mirandaText').textContent = text;
-        }
+    document.getElementById('mirandaText').textContent = text;
+}
+
 function copyDiscordReport() {
     showToast("Rapport copié !");
     const source = document.getElementById("fullReasonDisplay");
 
 
     if (!source || source.textContent.trim() === "") {
+            showToast(" Rien à copier dans le rapport !");
         return;
     }
 
