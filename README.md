@@ -32,8 +32,7 @@ L’objectif est de rendre les procédures plus **simples**, **rapides** et **cl
 
 🚀 Installation / Utilisation
 
-*  Accessible directement via un navigateur web https://ogafkman.github.io/grandrpcodepenal/
-
+*  Accessible directement via un navigateur web [Grand RP – Composants Restants](https://ogafkman.github.io/grandrpcodepenal/)
 ---
 
 ## ⚠️ Avertissement
