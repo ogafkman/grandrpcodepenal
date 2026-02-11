@@ -699,14 +699,11 @@ Avez-vous compris vos droits ?
 
     document.getElementById('mirandaText').textContent = text;
 }
-
 function copyDiscordReport() {
-    showToast("Rapport copié !");
     const source = document.getElementById("fullReasonDisplay");
 
-
     if (!source || source.textContent.trim() === "") {
-            showToast(" Rien à copier dans le rapport !");
+        showToast("Aucun motif à copier", true);
         return;
     }
 
@@ -718,10 +715,10 @@ function copyDiscordReport() {
         .replace(/ê/g, "e")
         .replace(/\s*\+\s*/g, " + ")
         .trim();
-    navigator.clipboard.writeText(report);
 
-
-        }
+    navigator.clipboard.writeText(text);
+    showToast("Rapport copié dans le presse-papier");
+}
 
 
 
@@ -747,11 +744,36 @@ function copyDiscordReport() {
             navigator.clipboard.writeText(text).then(() => { });
             showToast("Texte copié !");
         }
-                function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+        function showToast(message) {
+            var toast = document.getElementById("toast");
+            var toastMsg = document.getElementById("toastMsg");
+            var toastIcon = toast.querySelector("i");
+
+            // Liste des messages qui doivent afficher un triangle jaune (Attention)
+            var warningMessages = [
+                "Aucun motif à copier",
+                "Sélectionnez des articles d'abord !"
+            ];
+
+            // Mise à jour du texte
+            toastMsg.innerText = message;
+
+            // Vérification : Est-ce que le message est dans notre liste d'avertissements ?
+            if (warningMessages.includes(message)) {
+                // CAS ATTENTION : Triangle jaune
+                toastIcon.className = "fas fa-exclamation-triangle text-yellow-500 text-xl";
+            } else {
+                // CAS SUCCÈS (par défaut) : Check vert
+                toastIcon.className = "fas fa-check-circle text-green-500 text-xl";
+            }
+
+            // Afficher le toast
+            toast.classList.add("show");
+
+            // Le cacher après 3 secondes
+            setTimeout(function() {
+                toast.classList.remove("show");
+            }, 3000);
         }
     </script>
 </div>
