@@ -374,15 +374,15 @@ function updateReasons() {
                 bg: "bg-red-500/10",
                 border: "border-red-500/30",
                 articles: {
-                "2.0.1": { name: "Arme Légale sans PPA", fine: 20000, prison: 15, extra: "Confiscation", detail: "Arme avec série mais sans permis.", code: "arme sans ppa" },
-                "2.0.2": { name: "Arme Illégale (XXX)", fine: 20000, prison: 30, extra: "Confiscation + Retrait PPA", detail: "Pas de numéro de série.", code: "arme illegale xxx" },
-                "2.0.21": { name: "Arme tranchante", fine: 10000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Couteau, dague, etc.", code: "arme tranchante" },
+                "2.0.1": { name: "Armes Légales sans PPA", fine: 20000, prison: 15, extra: "Confiscation", detail: "Arme avec série mais sans permis.", code: "arme sans ppa" },
+                "2.0.2": { name: "Armes Illégales (XXX)", fine: 20000, prison: 30, extra: "Confiscation + Retrait PPA", detail: "Pas de numéro de série.", code: "arme illegale xxx" },
+                "2.0.21": { name: "Armes tranchantes", fine: 10000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Couteau, dague, etc.", code: "arme tranchante" },
                 "2.0.3": { name: "Matériel d'État", fine: 20000, prison: 45, extra: "Confiscation + Retrait PPA", detail: "Gilet, taser, arme police.", code: "materiel etat" },
                 "2.0.4": { name: "Gilet Pare-Balles Teinté", fine: 10000, prison: 15, extra: "Confiscation + Retrait PPA", detail: "Tout sauf noir ammu.", code: "gilet colore" },
                 "2.0.5": { name: "Vente/Achat Armes Illégal", fine: 30000, prison: 45, extra: "Confiscation + Retrait PPA", detail: "Lieu public ou privé.", code: "vente armes illegales" },
                 "2.0.6": { name: "Brandissement Public", fine: 20000, prison: 15, extra: "Confiscation + Retrait PPA", detail: "Sans raison valable.", code: "brandissement public" },
                 "2.0.7": { name: "Décharge Sans Raison", fine: 30000, prison: 30, extra: "Confiscation + Retrait PPA", detail: "Tirer sans raison légale.", code: "decharge arme" },
-                "2.0.8": { name: "Arme par destination", fine: 20000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Batte, club de golf utilisé de manière menaçante.", code: "arme par destination" },
+                "2.0.8": { name: "Armes par destination", fine: 20000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Batte, club de golf utilisé de manière menaçante.", code: "arme par destination" },
                 }
             },
             "3.0": {
@@ -398,10 +398,11 @@ function updateReasons() {
                 "3.0.2": { name: "Possession Substances (11-20)", fine: 12000, prison: 0, extra: "Confiscation", detail: "Quantité modérée.", code: "substances 11-20" },
                 "3.0.3": { name: "Possession Substances (21+)", fine: 25000, prison: 30, extra: "Confiscation", detail: "Grande quantité.", code: "substances 21+" },
                 "3.0.4": { name: "Trafic de Substances", fine: 35000, prison: 45, extra: "Confiscation", detail: "Intention de distribuer.", code: "traffic substances" },
-                "3.0.5": { name: "Usage Substances", fine: 5000, prison: 0, extra: "Confiscation", detail: "Sauf cannabis.", code: "usage substances" },
-                "3.0.6": { name: "Intoxication Publique", fine: 5000, prison: 0, extra: "Cellule dégrisement", detail: "Risque pour soi ou autrui.", code: "intoxication publique" },
+                "3.0.5": { name: "Usage Substances", fine: 5000, prison: 0, extra: "Confiscation", detail: "L'Utilisation de Substances Altérant l'Esprit", code: "usage substances" },
+                "3.0.6": { name: "Intoxication Publique", fine: 5000, prison: 0, extra: "Confiscation + cellule dégrisement", detail: "Risque pour soi ou autrui.", code: "intoxication publique" },
                 "3.0.7": { name: "Possession Articles Interdits", fine: 15000, prison: 0, extra: "Confiscation", detail: "Objets interdits à la vente.", code: "articles interdits" },
                 "3.0.8": { name: "Trafic Objets Interdits", fine: 30000, prison: 30, extra: "Confiscation", detail: "Intention de distribuer.", code: "traffic objets interdits" },
+                "3.0.9": { name: "Installation d’articles illégaux sur location", fine: 40000, prison: 60, extra: "Confiscation", detail: "Installation d’articles illégaux sur une voiture de location", code: "Installation d’articles illégaux sur location" },
                 }
             },
             "4.0": {
@@ -415,9 +416,7 @@ function updateReasons() {
                 "4.0.1.a": { name: "Se faire Passer pour un Fonctionnaire", fine: 40000, prison: 75, extra: "Confiscation Armes + Retrait PPA", detail: "S'habiller, badge, ou prétendre être agent.", code: "faux fonctionnaire" },
                 "4.0.1.b": { name: "Utilisation illégale de signaux d'urgence", fine: 20000, prison: 15, extra: "", detail: "Usage de gyrophares/sirènes réservés FDO.", code: "signaux urgence" },
                 "4.0.2": { name: "Entrave à la Justice", fine: 20000, prison: 45, extra: "", detail: "Obstruer le travail des policiers ou magistrats.", code: "entrave justice" },
-                "4.0.2.1": { name: "Intimidation témoin", fine: 30000, prison: 60, extra: "Retrait PPA", detail: "Pressions ou menaces sur un témoin.", code: "intimidation temoin" },
                 "4.0.3": { name: "Agression par la Menace", fine: 15000, prison: 30, extra: "Confiscation Armes + Retrait PPA", detail: "Menaces d'agression physique ou morale.", code: "menaces agression" },
-                "4.0.3.b": { name: "Incitation à la haine ou violence", fine: 25000, prison: 45, extra: "Retrait PPA", detail: "Propos appelant à la haine ou discrimination.", code: "incitation haine" },
                 "4.0.4": { name: "Émeute", fine: 10000, prison: 45, extra: "", detail: "Soulèvement populaire non autorisé.", code: "emeute" },
                 "4.0.4.bis": { name: "Manifestation illégale", fine: 20000, prison: 30, extra: "", detail: "Rassemblement sur voie publique sans autorisation.", code: "manifestation illegale" },
                 "4.0.5": { name: "Tentative d'Evasion / Evasion", fine: 30000, prison: 75, extra: "Sans Possibilité de Caution", detail: "S'échapper d'un lieu d'enfermement.", code: "evasion" },
@@ -425,7 +424,6 @@ function updateReasons() {
                 "4.0.7": { name: "Coups et Blessures sur Citoyen", fine: 15000, prison: 30, extra: "", detail: "Violences intentionnelles sur civil.", code: "violence citoyen" },
                 "4.0.8": { name: "Coups et Blessures sur Agent FDO", fine: 20000, prison: 45, extra: "", detail: "Violences intentionnelles sur agent.", code: "violence agent fdo" },
                 "4.0.9": { name: "Insubordination (Agent Etat)", fine: 15000, prison: 45, extra: "Licenciement + Blacklist min. 3J", detail: "Remise en cause d'un ordre supérieur.", code: "insubordination agent" },
-                "4.0.10": { name: "Diffamation publique", fine: 10000, prison: 15, extra: "", detail: "Propos mensongers portant atteinte à l'honneur.", code: "diffamation" },
                 "4.1.0.a": { name: "Violation de la Vie Privée", fine: 10000, prison: 30, extra: "", detail: "Partage de parties intimes sans consentement.", code: "violation vie privee" },
                 "4.1.0.b": { name: "Atteinte à la dignité", fine: 10000, prison: 15, extra: "", detail: "Acte portant atteinte à l'intégrité ou dignité.", code: "atteinte dignite" },
                 "4.1.1": { name: "Propagation de Maladie", fine: 6000, prison: 0, extra: "", detail: "Propager intentionnellement une maladie.", code: "propagation maladie" },
@@ -434,20 +432,20 @@ function updateReasons() {
                 "4.1.2.1.a": { name: "Chantage", fine: 20000, prison: 45, extra: "", detail: "Menacer de révéler des faits pour obtenir un bien.", code: "chantage" },
                 "4.1.2.1.b": { name: "Exécution du Chantage", fine: 35000, prison: 45, extra: "", detail: "Divulgation des infos suite au chantage.", code: "execution chantage" },
                 "4.1.3": { name: "Refus d'obtempérer", fine: 20000, prison: 45, extra: "Sans Possibilité de Caution", detail: "Refuser d'obéir à un ordre fonctionnaire.", code: "refus obtemperer" },
-                "4.1.3.1": { name: "Non-respect décision judiciaire", fine: 30000, prison: 60, extra: "", detail: "Interdiction contact, pointage, etc.", code: "non respect judiciaire" },
                 "4.1.4": { name: "Fausses Déclarations", fine: 15000, prison: 15, extra: "", detail: "Mentir lors d'un interrogatoire.", code: "fausses declarations" },
                 "4.1.5": { name: "Intrusion", fine: 10000, prison: 30, extra: "45 mois si bâtiment État", detail: "S'introduire sans droit en propriété privée.", code: "intrusion" },
                 "4.1.6": { name: "Agent d'Etat Corrompu", fine: 45000, prison: 60, extra: "Licenciement + Blacklist 30J", detail: "Se faire rémunérer pour un acte officiel.", code: "agent corrompu" },
                 "4.1.7": { name: "Non-Paiement Contraventions", fine: 0, prison: 45, extra: "Révocation licences + Sans Caution", detail: "Seuil de 500,000$ impayé atteint.", code: "contraventions impayees" },
-                "4.1.8": { name: "Port de masque", fine: 0, prison: 0, extra: "Motif de contrôle et fouille", detail: "Porter un masque en lieu public.", code: "port masque" },
+                "4.1.8.a": { name: "Port de masque", fine: 0, prison: 0, extra: "Motif de contrôle et fouille", detail: "Porter un masque en lieu public.", code: "port masque" },
+                "4.1.8.b": { name: "Utilisation de Maquillage", fine: 0, prison: 0, extra: "Mise a Pied ou Licenciement", detail: "Utilisation de Maquillage sans Autorisation pour un Agent D'Etat", code: "port masque" },
                 "4.1.9": { name: "Evénement Dangereux non encadré", fine: 20000, prison: 0, extra: "", detail: "Sans 1 EMS et 1 Agent État.", code: "evenement dangereux" },
                 "4.2.0": { name: "Cambriolage", fine: 30000, prison: 45, extra: "Possibilité de Caution", detail: "Vol en habitation par effraction.", code: "cambriolage" },
                 "4.2.1": { name: "Extorsion", fine: 15000, prison: 45, extra: "Confiscation Armes + Retrait PPA", detail: "Obtenir signature/bien par violence/menace.", code: "extorsion" },
                 "4.2.2": { name: "Falsification Document", fine: 45000, prison: 60, extra: "", detail: "Modifier licences, contrats ou documents.", code: "falsification document" },
                 "4.2.2.b": { name: "Usurpation d'identité", fine: 15000, prison: 30, extra: "", detail: "Se faire passer pour une autre personne.", code: "usurpation identite" },
+                "4.2.2.c": { name: "Photo non conforme", fine: 5000, prison: 0, extra: "", detail: "Photo non conforme sur le Passeport", code: "Photo non conforme" },
                 "4.2.3": { name: "Vol Qualifié", fine: 15000, prison: 45, extra: "Confiscation Armes + Retrait PPA", detail: "Vol avec violence ou arme.", code: "vol qualifie" },
                 "4.2.4": { name: "Chasse ou pêche illégale", fine: 20000, prison: 0, extra: "Confiscation + Retrait PPA", detail: "Braconnage sans relâchement.", code: "braconnage" },
-                "4.2.5": { name: "Corrompre un Fonctionnaire", fine: 45000, prison: 60, extra: "", detail: "Offre ou promesse à un agent.", code: "corruption fonctionnaire" },
                 "4.2.6.a": { name: "Mise en danger d'autrui", fine: 30000, prison: 45, extra: "", detail: "Exposition volontaire à un risque de mort.", code: "mise en danger" },
                 "4.2.6.b": { name: "Non-Assistance à Personne", fine: 10000, prison: 30, extra: "", detail: "Abandonner quelqu'un en danger de mort.", code: "non assistance" },
                 "4.2.7": { name: "Libération Caution Illégale", fine: 50000, prison: 60, extra: "Retrait Licences Avocat + PPA", detail: "Libérer sans approbation Gouvernement.", code: "liberation sans autorisation" },
@@ -465,7 +463,9 @@ function updateReasons() {
             },
             "5.0": {
                 title : "Atteinte à la Nation",
-                color: "from-purple-600 to-violet-600",
+                color: "text-rose-500",
+                bg: "bg-rose-500/10",
+                border: "border-rose-500/30",
                 icon: "fas fa-flag",
                 articles: {
                 "5.0.1": { name: "Tentative de Coup d'État", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Renversement illégal du pouvoir par la force.", code: "coup etat" },
@@ -475,6 +475,16 @@ function updateReasons() {
                 "5.0.6": { name: "Attaque Base Militaire", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Intrusion et attaque du personnel militaire pour vol.", code: "attaque base militaire" },
                 "5.0.7": { name: "Attentat contre Institutions", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Atteinte aux intérêts fondamentaux de la nation.", code: "attentat institutions" },
                 "5.0.8": { name: "Mouvement Insurrectionnel", fine: 50000, prison: 75, extra: "Retrait Licences + Sans Caution", detail: "Action de rébellion visant à renverser le pouvoir.", code: "insurrection" }}
+            },
+            "autre": {
+                title : "autre",
+                color: "text-amber-500", // Un jaune chaud plus lisible que le jaune pur
+                bg: "bg-amber-500/10",   // Fond très léger
+                border: "border-amber-500/30", // Bordure subtile
+                icon: "fas fa-cubes",
+                articles: {
+                "Avis de recherche": { name: "Avis de recherche", fine: 0, prison: 0, extra: "", detail: "", code: "avis de recherche" }
+            }
             }
         }
 
@@ -708,7 +718,6 @@ function copyDiscordReport() {
     }
 
     let text = source.textContent;
-
     text = text
         .replace(/,/g, " + ")
         .replace(/'/g, "")
