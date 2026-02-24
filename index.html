@@ -33,6 +33,65 @@
     </script>
 
     <style>
+        /* ===== STARTUP SCREEN ===== */
+
+#startupScreen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: fadeOutStartup 1s ease forwards;
+    animation-delay: 2s;
+}
+
+.startup-content {
+    text-align: center;
+    animation: startupEnter 1s ease-out;
+}
+
+.startup-content i {
+    font-size: 50px;
+    color: #6366f1;
+    margin-bottom: 20px;
+    animation: pulseIcon 1.5s infinite;
+}
+
+.startup-content h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    letter-spacing: 2px;
+}
+
+.startup-content p {
+    color: #94a3b8;
+    margin-top: 10px;
+}
+
+/* Animations */
+
+@keyframes startupEnter {
+    from { opacity: 0; transform: translateY(30px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes fadeOutStartup {
+    to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
+
+        
         body {
             background-color: #0f172a;
             background-image: 
@@ -95,10 +154,9 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes resetFadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .reset-animate { animation: resetFadeSlide 0.4s ease-out; }
         #toast {
             position: fixed;
             bottom: 20px;
@@ -124,7 +182,14 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
-
+<div id="customCursor"></div>
+<div id="startupScreen">
+    <div class="startup-content">
+        <i class="fas fa-gavel"></i>
+        <h1>GrandRP</h1>
+        <p>Initialisation du Code Pénal...</p>
+    </div>
+</div>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden text-sm md:text-base">
         <div id="toast">
         <i class="fas fa-check-circle text-green-500 text-xl"></i>
@@ -289,6 +354,50 @@
     </div>
     <!-- DATA & LOGIC -->
     <script>
+        
+
+        function calculateTotal() {
+            let totalFine = 0;
+            let totalPrison = 0;
+
+            // Calcul des articles sélectionnés
+            selectedArticles.forEach(articleKey => {
+                for (const section of Object.values(codePenal)) {
+                    if (section.articles[articleKey]) {
+                        totalFine += section.articles[articleKey].fine;
+                        totalPrison += section.articles[articleKey].prison;
+                    }
+                }
+            });
+
+            // Ajout du temps de prison lié au statut "Wanted" (Etoiles)
+            const wantedStatus = document.getElementById('wantedStatus');
+            const wantedValue = parseInt(wantedStatus.value);
+            if (wantedValue > 0) {
+                totalPrison += (wantedValue * 15);
+            }
+
+            // Mise à jour de l'affichage
+            document.getElementById('fineDisplay').textContent = `$${totalFine.toLocaleString()}`;
+            document.getElementById('prisonDisplay').textContent = `${totalPrison} mois`;
+            document.getElementById('countDisplay').textContent = selectedArticles.size;
+            
+            // Mise à jour des étoiles visuelles
+            const starsDisplay = document.getElementById('starsDisplay');
+            starsDisplay.innerHTML = '⭐'.repeat(calculateStars(totalPrison));
+            
+            updateReasons();
+        }
+
+        function toggleArticle(key) {
+            if (selectedArticles.has(key)) {
+                selectedArticles.delete(key);
+            } else {
+                selectedArticles.add(key);
+            }
+            renderArticles();
+            calculateTotal();
+        }
 function calculateStars(prisonMonths) {
     return Math.min(5, Math.floor(prisonMonths / 15));
 
@@ -488,18 +597,34 @@ function updateReasons() {
             }
         }
 
-        // --- STATE MANAGEMENT ---
-        let selectedArticles = new Set();
-        let currentSearch = "";
+// --- GESTION DE L'ÉTAT ---
+let selectedArticles = new Set();
+let currentSearch = "";
 
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    renderArticles();
+    
+    // Correction Bug Étoiles : Synchronisation avec "Avis de recherche"
+    const wantedStatusSelect = document.getElementById('wantedStatus');
+    if (wantedStatusSelect) {
+        wantedStatusSelect.addEventListener('change', function() {
+            if (this.value !== "0") {
+                selectedArticles.add("Avis de recherche");
+            } else {
+                selectedArticles.delete("Avis de recherche");
+            }
             renderArticles();
+            calculateTotal();
         });
-
+    }
+});
         // --- RENDER LOGIC ---
         function renderArticles() {
             const container = document.getElementById('articlesContainer');
+            
+            // --- FIX BUG SCROLL : Sauvegarder la position actuelle ---
+            const scrollPos = document.getElementById('mainContainer').scrollTop;
+            
             container.innerHTML = '';
 
             for (const [sectionKey, section] of Object.entries(codePenal)) {
@@ -508,15 +633,15 @@ function updateReasons() {
                 const filteredArticles = sectionArticles.filter(([key, art]) => {
                     const search = currentSearch.toLowerCase();
                     return art.name.toLowerCase().includes(search) || 
-                           art.code.toLowerCase().includes(search) || 
-                           key.includes(search);
+                           (art.code && art.code.toLowerCase().includes(search)) || 
+                           key.toLowerCase().includes(search);
                 });
 
                 if (filteredArticles.length === 0) continue;
 
                 // Create Section Header
                 const sectionHtml = document.createElement('div');
-                sectionHtml.className = 'animate-fade-in';
+                sectionHtml.className = 'animate-fade-in mb-8';
                 
                 let cardsHtml = '';
                 filteredArticles.forEach(([key, art]) => {
@@ -549,8 +674,8 @@ function updateReasons() {
 
                 sectionHtml.innerHTML = `
                     <div class="flex items-center gap-3 mb-4 sticky top-0 z-10 py-2 backdrop-blur-sm bg-slate-900/80 md:bg-transparent md:backdrop-blur-none rounded-xl">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${section.bg} ${section.color}">
-                            <i class="fas ${section.icon}"></i>
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${section.bg || 'bg-slate-500/20'} ${section.color || 'text-slate-400'}">
+                            <i class="fas ${section.icon || 'fa-folder'}"></i>
                         </div>
                         <h3 class="text-lg font-bold text-slate-200">${section.title}</h3>
                     </div>
@@ -561,6 +686,9 @@ function updateReasons() {
                 
                 container.appendChild(sectionHtml);
             }
+            
+            // --- FIX BUG SCROLL : Restaurer la position immédiatement ---
+            document.getElementById('mainContainer').scrollTop = scrollPos;
         }
 
         // --- INTERACTION LOGIC ---
@@ -632,17 +760,29 @@ function renderStars(stars) {
 
 
         // FONCTION RESET MODIFIÉE
+
         function resetAll() {
-            showToast("Réinitialisation effectuée");
-            selectedArticles.clear();
-            document.getElementById('wantedStatus').value = 0;
-            document.getElementById('searchInput').value = "";
-            
-            // On rafraîchit l'affichage (si tes fonctions existent)
-            if (window.renderArticles) renderArticles();
-            if (window.calculateTotal) calculateTotal();
-            
-            // ON AFFICHE LA NOTIF
+
+            // 1. Animation
+mainContainer.classList.remove('reset-animate');
+void mainContainer.offsetWidth; // force reflow
+mainContainer.classList.add('reset-animate');
+
+// 2. Reset logique
+selectedArticles.clear();
+
+const wantedStatus = document.getElementById('wantedStatus');
+if (wantedStatus) wantedStatus.value = "0";
+
+const searchInput = document.getElementById('searchInput');
+if (searchInput) searchInput.value = "";
+
+currentSearch = "";
+
+renderArticles();
+calculateTotal();
+
+showToast("Calculateur réinitialisé");
 
         }
 // --- MIRANDA & REPORT LOGIC ---
@@ -697,7 +837,9 @@ Vous êtes actuellement en état d'arrestation pour ${charges.length > 0 ? charg
 
 Nous sommes le : ${date} à ${heure}.
 
-Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice. Vous avez le droit à un avocat et à ce qu'un avocat soit présent lors de l'interrogatoire. Si vous n'en avez pas les moyens, un avocat vous sera fourni gratuitement.
+Vous avez le droit de garder le silence. Si vous renoncez à ce droit, tout ce que vous direz pourra être et sera utilisé contre vous devant une cour de justice. 
+
+Vous avez le droit à un avocat et à ce qu'un avocat soit présent lors de l'interrogatoire. Si vous n'en avez pas les moyens, un avocat vous sera fourni gratuitement.
 
 Durant chaque interrogatoire, vous pouvez décider à tout moment d'exercer ces droits, de ne répondre à aucune question ou de ne faire aucune déposition.
 
